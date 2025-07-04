@@ -1,12 +1,20 @@
-import React from 'react';
-import MintBotDashboard from '../MintBotDashboard';
+// App.tsx or main routing file
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import PrivateKeyPage from "../PrivateKeyPage";
+import ContractScanPage from "../ContractScanPage";
+import MintBotDashboard from "../MintBotDashboard";
 
-const App: React.FC = () => {
+function App() {
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white p-0 m-0 overflow-hidden">
-      <MintBotDashboard />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<PrivateKeyPage />} />
+        <Route path="/scan" element={<ContractScanPage />} />
+        <Route path="/dashboard" element={<MintBotDashboard />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
+

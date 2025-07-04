@@ -10,7 +10,7 @@ const MintBotDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white p-0 m-0 overflow-hidden flex items-center justify-center">
+    <div className="min-h-screen w-full overflow-hidden flex items-center justify-center bg-[#0f172a] text-white p-0 m-0 relative">
       {/* Glowing Orbs */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-100px] left-[-100px] w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
