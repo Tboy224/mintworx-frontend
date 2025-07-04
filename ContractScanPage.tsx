@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+
 
 const ContractScanPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,14 +33,17 @@ const ContractScanPage: React.FC = () => {
         <div className="absolute top-[-100px] left-[-100px] w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
         <div className="absolute bottom-[-100px] right-[-100px] w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse delay-200" />
       </div>
+      <div className="absolute top-4 right-4 z-50">
+           <ConnectButton
+              showBalance={false}
+              accountStatus="address"
+              chainStatus="icon"
+           />
+      </div>
 
       {/* Content Box */}
       <div className="relative z-10 w-full max-w-2xl p-8 bg-white/5 text-white rounded-3xl shadow-2xl backdrop-blur-md border border-white/20">
         {/* Top Bar */}
-        <div className="flex justify-between mb-6">
-          <div className="border border-gray-400 px-3 py-1 rounded">Network</div>
-          <div className="border border-gray-400 px-3 py-1 rounded">0x3...</div>
-        </div>
 
         {/* Input Fields */}
         <div className="space-y-4">

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const MintBotDashboard: React.FC = () => {
   const [speedValue, setSpeedValue] = useState(0); // Smooth slider from 0 to 100
@@ -17,12 +18,15 @@ const MintBotDashboard: React.FC = () => {
         <div className="absolute bottom-[-100px] right-[-100px] w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse delay-200" />
       </div>
 
+      <div className="absolute top-4 right-4 z-50">
+        <ConnectButton
+          showBalance={false}
+          accountStatus="address"
+          chainStatus="icon"
+        />
+      </div>
+
       <div className="relative z-10 w-full max-w-4xl p-8 bg-white/5 text-white rounded-3xl shadow-2xl backdrop-blur-md border border-white/20">
-        {/* Top Right Boxes */}
-        <div className="flex justify-end gap-2 mb-4">
-          <div className="border border-gray-500 px-3 py-1 rounded">Network</div>
-          <div className="border border-gray-500 px-3 py-1 rounded">0x32..</div>
-        </div>
 
         {/* NFT Details Box */}
         <div className="border border-gray-500 p-4 mb-6 rounded">
