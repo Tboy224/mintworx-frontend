@@ -11,8 +11,15 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "@rainbow-me/rainbowkit": "^2.0.0",
+    "@tanstack/react-query": "^5.0.0",
+    "crypto-js": "^4.2.0",
+    "next": "^14.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "viem": "^2.0.0",
+    "wagmi": "^2.0.0",
+    "wagmi-rainbowkit-wallet-connect": "file:",
     "react-router-dom": "^7.6.3"
   },
   "devDependencies": {
