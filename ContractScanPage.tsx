@@ -5,17 +5,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const ContractScanPage: React.FC = () => {
   const navigate = useNavigate();
-  const [privatePart, setPrivatePart] = useState("");
   const [contractAddress, setContractAddress] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleScan = () => {
-    if (!privatePart.startsWith("0x") || privatePart.length < 8) {
-      setError("Invalid private key part. Must start with '0x' and be at least 8 characters long.");
-      setSuccess(false);
-      return;
-    }
+    
     if (!contractAddress.startsWith("0x") || contractAddress.length !== 12) {
       setError("Invalid contract address. Must start with '0x' and be 12 characters long.");
       setSuccess(false);
@@ -47,13 +42,6 @@ const ContractScanPage: React.FC = () => {
 
         {/* Input Fields */}
         <div className="space-y-4">
-          <input
-            type="text"
-            placeholder="Part of the private key 0x2....bc"
-            value={privatePart}
-            onChange={(e) => setPrivatePart(e.target.value)}
-            className="w-full p-2 text-white rounded border border-gray-400 focus:outline-none"
-          />
           <input
             type="text"
             placeholder="Enter contract address"

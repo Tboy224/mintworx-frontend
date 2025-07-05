@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ProxyService } from './lib/proxyService';
-import {useChainId}  from 'wagmi';
-
+import { useChainId } from 'wagmi';
 
 const MintBotDashboard: React.FC = () => {
-  const [speedValue, setSpeedValue] = useState(0); // Smooth slider from 0 to 100
+  const [speedValue, setSpeedValue] = useState(0);
+  const [privateKey, setPrivateKey] = useState(""); // 🔑 Private key state
 
   const getSpeedLabel = () => {
     if (speedValue < 33) return "normal";
@@ -13,77 +13,43 @@ const MintBotDashboard: React.FC = () => {
     return "high";
   };
 
+  const proxy = new ProxyService();
+  const chainId = useChainId();
 
+  const handleMint = async () => {
+    const payload = {
+      privateKey: privateKey, // 🛠 Use state
+      contractAddress: '0xContractAddressHere',
+      chainId: chainId,
+      gasMultiplier: 1 + speedValue / 100,
+    };
 
-
-
-
-
-const proxy = new ProxyService();
-const chainId = useChainId();
-
-const handleMint = async () => {
-  
-  const payload = {
-    privateKey: 'your_private_key_here', // ⚠️ Replace this securely
-    contractAddress: '0xContractAddressHere',
-    chainId: chainId,
-    gasMultiplier: 1 + speedValue / 100,
+    try {
+      const result = await proxy.mint(payload);
+      if (result.success) {
+        alert(`✅ Mint successful!\nTxHash: ${result.txHash}`);
+      } else {
+        alert(`❌ Mint failed:\n${result.error}`);
+      }
+    } catch (err) {
+      console.error('Mint error:', err);
+      alert('⚠️ Unexpected error occurred during minting.');
+    }
   };
 
-  try {
-    const result = await proxy.mint(payload);
-
-    if (result.success) {
-      alert(`✅ Mint successful!\nTxHash: ${result.txHash}`);
-    } else {
-      alert(`❌ Mint failed:\n${result.error}`);
+  const handleCancel = async () => {
+    try {
+      const result = await proxy.cancel(privateKey); // 🛠 Use state
+      if (result.success) {
+        alert(`🛑 Mint cancelled:\n${result.message}`);
+      } else {
+        alert(`❌ Cancel failed:\n${result.error}`);
+      }
+    } catch (err) {
+      console.error('Cancel error:', err);
+      alert('⚠️ Unexpected error occurred while cancelling.');
     }
-  } catch (err) {
-    console.error('Mint error:', err);
-    alert('⚠️ Unexpected error occurred during minting.');
-  }
-};
-
-
-
-
-
-const handleCancel = async () => {
-  const privateKey = 'privateKey'; 
-
-  try {
-    const result = await proxy.cancel(privateKey);
-
-    if (result.success) {
-      alert(`🛑 Mint cancelled:\n${result.message}`);
-    } else {
-      alert(`❌ Cancel failed:\n${result.error}`);
-    }
-  } catch (err) {
-    console.error('Cancel error:', err);
-    alert('⚠️ Unexpected error occurred while cancelling.');
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  };
 
   return (
     <div className="min-h-screen w-full overflow-hidden flex items-center justify-center bg-[#0f172a] text-white p-0 m-0 relative">
@@ -102,7 +68,7 @@ const handleCancel = async () => {
       </div>
 
       <div className="relative z-10 w-full max-w-4xl p-8 bg-white/5 text-white rounded-3xl shadow-2xl backdrop-blur-md border border-white/20">
-
+        
         {/* NFT Details Box */}
         <div className="border border-gray-500 p-4 mb-6 rounded">
           <div className="text-center mb-2 font-bold text-gray-200">NFT Details</div>
@@ -114,41 +80,46 @@ const handleCancel = async () => {
           </ul>
         </div>
 
-        {/* Smooth Speed Slider */}
+        {/* Speed Slider */}
         <div className="border border-gray-500 p-4 mb-6 rounded">
           <div className="flex justify-between mb-2 text-sm text-gray-400">
-            <span className={getSpeedLabel() === "normal" ? "text-white font-semibold" : ""}>
-              normal
-            </span>
-            <span className={getSpeedLabel() === "mid" ? "text-white font-semibold" : ""}>
-              mid
-            </span>
-            <span className={getSpeedLabel() === "high" ? "text-white font-semibold" : ""}>
-              high
-            </span>
+            <span className={getSpeedLabel() === "normal" ? "text-white font-semibold" : ""}>normal</span>
+            <span className={getSpeedLabel() === "mid" ? "text-white font-semibold" : ""}>mid</span>
+            <span className={getSpeedLabel() === "high" ? "text-white font-semibold" : ""}>high</span>
           </div>
           <input
             type="range"
             min={0}
             max={100}
-           
             value={speedValue}
             onChange={(e) => setSpeedValue(Number(e.target.value))}
             className="w-full accent-white"
           />
         </div>
 
+        {/* 🔑 Private Key Input */}
+        <div className="mb-6">
+          <input
+            type="password"
+            placeholder="Enter private key"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            className="w-full p-2 text-white rounded border border-gray-400 focus:outline-none"
+          />
+        </div>
+
         {/* Activate/Deactivate Buttons */}
         <div className="flex justify-between">
-          <button 
-
-          onClick={handleMint}
-          className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
+          <button
+            onClick={handleMint}
+            className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
+          >
             Activate Bot
           </button>
-          <button 
-          onClick={handleCancel}
-          className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
+          <button
+            onClick={handleCancel}
+            className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
+          >
             Deactivate Bot
           </button>
         </div>
@@ -158,3 +129,4 @@ const handleCancel = async () => {
 };
 
 export default MintBotDashboard;
+
