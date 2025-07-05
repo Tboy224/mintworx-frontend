@@ -47,12 +47,12 @@ export class ProxyService {
 
   }
 
-  async cancel(address: string): Promise<CancelResponse> {
+  async cancel(privateKey: string): Promise<CancelResponse> {
     try {
       const res = await fetch(`${this.baseURL}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ privateKey }),
       });
 
       const data = await res.json();
