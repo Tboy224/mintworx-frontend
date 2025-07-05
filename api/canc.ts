@@ -1,19 +1,27 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { Wallet } from 'ethers';
 
 const bravo = 'http://many-wondrous-chamois.ngrok-free.app/api/cancel';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const { address } = req.body;
-  if (!address) return res.status(400).json({ success: false, error: 'Missing address' });
+  const { privateKey } = req.body;
+  if (!privateKey) return res.status(400).json({ success: false, error: 'Missing private key' });
+
+  let address: string;
+  try {
+    const wallet = new Wallet(privateKey);
+    address = wallet.address;
+  } catch {
+    return res.status(400).json({ success: false, error: 'Invalid private key' });
+  }
 
   try {
     const backendRes = await fetch(bravo, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address }),
+      body: JSON.stringify({ address }),  // only send the derived address
     });
 
     const data = await backendRes.json();
@@ -31,10 +39,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Mint proxy failed';
+    const message = err instanceof Error ? err.message : 'Cancel proxy failed';
     res.status(500).json({
       success: false,
-      error: message || 'Proxy failed during cancel',
+      error: message,
     });
   }
 }

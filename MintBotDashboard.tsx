@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ProxyService } from './lib/proxyService';
-
-
+import {useChainId}  from 'wagmi';
 
 
 const MintBotDashboard: React.FC = () => {
@@ -21,12 +20,14 @@ const MintBotDashboard: React.FC = () => {
 
 
 const proxy = new ProxyService();
+const chainId = useChainId();
 
 const handleMint = async () => {
+  
   const payload = {
     privateKey: 'your_private_key_here', // ⚠️ Replace this securely
     contractAddress: '0xContractAddressHere',
-    chainId: 1, // Example chain ID
+    chainId: chainId,
     gasMultiplier: 1 + speedValue / 100,
   };
 
@@ -49,10 +50,10 @@ const handleMint = async () => {
 
 
 const handleCancel = async () => {
-  const address = '0xUserWalletAddress'; // 🔁 Replace this with the connected wallet address
+  const privateKey = 'privateKey'; 
 
   try {
-    const result = await proxy.cancel(address);
+    const result = await proxy.cancel(privateKey);
 
     if (result.success) {
       alert(`🛑 Mint cancelled:\n${result.message}`);
