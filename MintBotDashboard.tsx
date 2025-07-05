@@ -131,6 +131,7 @@ const handleCancel = async () => {
             type="range"
             min={0}
             max={100}
+           
             value={speedValue}
             onChange={(e) => setSpeedValue(Number(e.target.value))}
             className="w-full accent-white"

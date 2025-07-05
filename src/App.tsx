@@ -23,12 +23,14 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={darkTheme()}>
           <Router>
+            
             <Routes>
-              <Route path="/" element={<AutoRoute />}/>
-              <Route path="/pk" element={<PrivateKeyPage />} />
-              <Route path="/scan" element={<ContractScanPage />} />
-              <Route path="/dashboard" element={<MintBotDashboard />} />
+              <Route path="/" element={<AutoRoute />} />
+              <Route path="/pk" element={<ProtectedRoute><PrivateKeyPage /></ProtectedRoute>} />
+              <Route path="/scan" element={<ProtectedRoute><ContractScanPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><MintBotDashboard /></ProtectedRoute>} />
             </Routes>
+
           </Router>
         </RainbowKitProvider>
       </QueryClientProvider>
@@ -39,4 +41,9 @@ export default function App() {
 function AutoRoute() {
   const {isConnected} = useAccount();
   return isConnected ? <PrivateKeyPage /> : <ConnectSite />
+}
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isConnected } = useAccount();
+  return isConnected ? children : <ConnectSite />;
 }
