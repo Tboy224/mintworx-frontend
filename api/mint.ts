@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 import { privateKeyToAccount } from 'viem/accounts';
 
-const bravo = 'http://localhost:3000/api/mint';
+const bravo = 'http://many-wondrous-chamois.ngrok-free.app/api/mint';
 const figs = process.env.DECRYPTION_SECRET!;
 const alg = 'aes-256-gcm';
 

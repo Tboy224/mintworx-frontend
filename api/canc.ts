@@ -1,7 +1,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-const bravo = 'http://localhost:3000/api/cancel';
+const bravo = 'http://many-wondrous-chamois.ngrok-free.app/api/cancel';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
@@ -30,10 +30,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: data.message,
     });
 
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Mint proxy failed';
     res.status(500).json({
       success: false,
-      error: err.message || 'Proxy failed during cancel',
+      error: message || 'Proxy failed during cancel',
     });
   }
 }
