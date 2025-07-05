@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ProxyService } from './lib/proxyService';
+
+
+
 
 const MintBotDashboard: React.FC = () => {
   const [speedValue, setSpeedValue] = useState(0); // Smooth slider from 0 to 100
@@ -9,6 +13,76 @@ const MintBotDashboard: React.FC = () => {
     if (speedValue < 66) return "mid";
     return "high";
   };
+
+
+
+
+
+
+
+const proxy = new ProxyService();
+
+const handleMint = async () => {
+  const payload = {
+    privateKey: 'your_private_key_here', // ⚠️ Replace this securely
+    contractAddress: '0xContractAddressHere',
+    chainId: 1, // Example chain ID
+    gasMultiplier: 1 + speedValue / 100,
+  };
+
+  try {
+    const result = await proxy.mint(payload);
+
+    if (result.success) {
+      alert(`✅ Mint successful!\nTxHash: ${result.txHash}`);
+    } else {
+      alert(`❌ Mint failed:\n${result.error}`);
+    }
+  } catch (err) {
+    console.error('Mint error:', err);
+    alert('⚠️ Unexpected error occurred during minting.');
+  }
+};
+
+
+
+
+
+const handleCancel = async () => {
+  const address = '0xUserWalletAddress'; // 🔁 Replace this with the connected wallet address
+
+  try {
+    const result = await proxy.cancel(address);
+
+    if (result.success) {
+      alert(`🛑 Mint cancelled:\n${result.message}`);
+    } else {
+      alert(`❌ Cancel failed:\n${result.error}`);
+    }
+  } catch (err) {
+    console.error('Cancel error:', err);
+    alert('⚠️ Unexpected error occurred while cancelling.');
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   return (
     <div className="min-h-screen w-full overflow-hidden flex items-center justify-center bg-[#0f172a] text-white p-0 m-0 relative">
@@ -64,10 +138,15 @@ const MintBotDashboard: React.FC = () => {
 
         {/* Activate/Deactivate Buttons */}
         <div className="flex justify-between">
-          <button className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
+          <button 
+
+          onClick={handleMint}
+          className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
             Activate Bot
           </button>
-          <button className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
+          <button 
+          onClick={handleCancel}
+          className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
             Deactivate Bot
           </button>
         </div>
