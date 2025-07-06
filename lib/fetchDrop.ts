@@ -3,6 +3,11 @@ import abi from "./ABI.json"; // Ensure ABI.json is in your project
 
 const SEADROP_ADDRESS = "0x00005EA00Ac477B1030CE78506496e8C2dE24bf5";
 
+const namsym = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+]
+
 const RPC_URLS: Record<number, string> = {
   1: "https://rpc.ankr.com/eth",
   10: "https://mainnet.optimism.io",
@@ -15,6 +20,8 @@ const RPC_URLS: Record<number, string> = {
 type PublicDropResult =
   | {
       valid: true;
+      name: string;
+      symbol: string;
       startTime: string;
       endTime: string;
     }
@@ -32,8 +39,14 @@ export async function fetchDrop(
 
     const provider = new JsonRpcProvider(rpc);
     const seaDrop = new Contract(SEADROP_ADDRESS, abi, provider);
-    const drop = await seaDrop.getPublicDrop(nftAddress);
+    const nft = new Contract(nftAddress,namsym,provider);
 
+    
+    
+    const drop = await seaDrop.getPublicDrop(nftAddress);
+    const name = await nft.name();
+    const symbol = await nft.symbol();
+   
     const startTime = drop[1];
     const endTime = drop[2];
 
@@ -43,6 +56,8 @@ export async function fetchDrop(
 
     return {
       valid: true,
+      name: name,
+      symbol: symbol,
       startTime: new Date(Number(startTime) * 1000).toISOString(),
       endTime: new Date(Number(endTime) * 1000).toISOString(),
     };
