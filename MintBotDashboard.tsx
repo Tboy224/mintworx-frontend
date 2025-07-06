@@ -4,14 +4,9 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ProxyService } from './lib/proxyService';
 import { useChainId } from 'wagmi';
 import { checkPrivateKeyBalance } from './lib/checkBal';
-import { ethers } from "ethers";
+import { fetchDrop } from "./lib/fetchDrop";
 
-const abi = [
-  "function name() view returns (string)",
-  "function symbol() view returns (string)",
-  "function totalSupply() view returns (uint256)",
-  "function startTime() view returns (uint256)"
-];
+
 
 const MintBotDashboard: React.FC = () => {
   const [speedValue, setSpeedValue] = useState(0);
@@ -25,8 +20,7 @@ const MintBotDashboard: React.FC = () => {
   const [nftDetails, setNftDetails] = useState({
     name: '',
     symbol: '',
-    totalSupply: '',
-    startTime: ''
+    startTime: '',
   });
 
   const proxy = new ProxyService();
@@ -38,36 +32,20 @@ const MintBotDashboard: React.FC = () => {
     return "high";
   };
 
-  const getNFTMetadata = async (address: string) => {
-    try {
-      const provider = new ethers.providers.JsonRpcProvider(
-        chainId === 1
-          ? 'https://rpc.ankr.com/eth'
-          : chainId === 137
-          ? 'https://rpc.ankr.com/polygon'
-          : chainId === 42161
-          ? 'https://rpc.ankr.com/arbitrum'
-          : undefined
-      );
+  const getNFTMetadata = async (address: string, chainId: number) => {
+  const result = await fetchDrop(address, chainId);
 
-      const contract = new ethers.Contract(address, abi, provider);
-      const name = await contract.name();
-      const symbol = await contract.symbol();
-      const totalSupply = (await contract.totalSupply()).toString();
-      let startTime = '';
-      try {
-        startTime = (await contract.startTime()).toString();
-      } catch {
-        startTime = 'N/A';
-      }
-
-      setNftDetails({ name, symbol, totalSupply, startTime });
-    } catch (err) {
-      console.error("Error fetching metadata:", err);
-      setErrorMessage("⚠️ Failed to fetch NFT metadata.");
-      setContractVerified(false);
-    }
-  };
+  if (result.valid) {
+    setNftDetails({
+      name: result.name,
+      symbol: result.symbol,
+      startTime: result.startTime,
+    });
+  } else {
+    setErrorMessage("⚠️ Failed to fetch NFT metadata.");
+    setContractVerified(false);
+  }
+};
 
   const verifyContractAddress = async () => {
     setVerifying(true);
@@ -82,7 +60,7 @@ const MintBotDashboard: React.FC = () => {
         setErrorMessage("❌ Invalid contract address format.");
         setContractVerified(false);
       } else {
-        await getNFTMetadata(contractAddress.trim());
+        await getNFTMetadata(contractAddress.trim(), chainId);
         setContractVerified(true);
       }
       setVerifying(false);
