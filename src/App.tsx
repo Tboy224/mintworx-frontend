@@ -10,7 +10,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { wagmiConfig } from './wagmiConfig';
 
 import ConnectSite from '../Connect.tsx'
-import PrivateKeyPage from '../PrivateKeyPage';
 import ContractScanPage from '../ContractScanPage';
 import MintBotDashboard from '../MintBotDashboard';
 
@@ -26,7 +25,7 @@ export default function App() {
             
             <Routes>
               <Route path="/" element={<AutoRoute />} />
-              <Route path="/pk" element={<ProtectedRoute><PrivateKeyPage /></ProtectedRoute>} />
+
               <Route path="/scan" element={<ProtectedRoute><ContractScanPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><MintBotDashboard /></ProtectedRoute>} />
             </Routes>
@@ -40,10 +39,11 @@ export default function App() {
 
 function AutoRoute() {
   const {isConnected} = useAccount();
-  return isConnected ? <PrivateKeyPage /> : <ConnectSite />
+  return isConnected ? <ContractScanPage /> : <ConnectSite />
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isConnected } = useAccount();
   return isConnected ? children : <ConnectSite />;
 }
+

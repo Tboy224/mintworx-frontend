@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-
 const ContractScanPage: React.FC = () => {
   const navigate = useNavigate();
   const [contractAddress, setContractAddress] = useState("");
@@ -10,37 +9,45 @@ const ContractScanPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const handleScan = () => {
-    
-    if (!contractAddress.startsWith("0x") || contractAddress.length !== 12) {
-      setError("Invalid contract address. Must start with '0x' and be 12 characters long.");
+    // Temporary validation
+    if (!contractAddress.startsWith("0x") || contractAddress.length !== 42) {
+      setError("Invalid contract address. Must start with '0x' and be 42 characters long.");
       setSuccess(false);
       return;
     }
+
+    // You can later replace this with a real SeaDrop check via an API or ABI inspection
+    const isSeaDrop = true;
+
     setError("");
     setSuccess(true);
-    setTimeout(() => navigate("/dashboard"), 1000);
+
+    setTimeout(() => {
+      navigate("/dashboard", {
+        state: {
+          isSeaDrop,
+          contractAddress,
+        },
+      });
+    }, 1000);
   };
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-[#0f172a] text-white p-6 relative">
-      {/* Glowing Backgrounds */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-100px] left-[-100px] w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
         <div className="absolute bottom-[-100px] right-[-100px] w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse delay-200" />
       </div>
+
       <div className="absolute top-4 right-4 z-50">
-           <ConnectButton
-              showBalance={false}
-              accountStatus="address"
-              chainStatus="icon"
-           />
+        <ConnectButton
+          showBalance={false}
+          accountStatus="address"
+          chainStatus="icon"
+        />
       </div>
 
-      {/* Content Box */}
       <div className="relative z-10 w-full max-w-2xl p-8 bg-white/5 text-white rounded-3xl shadow-2xl backdrop-blur-md border border-white/20">
-        {/* Top Bar */}
-
-        {/* Input Fields */}
         <div className="space-y-4">
           <input
             type="text"

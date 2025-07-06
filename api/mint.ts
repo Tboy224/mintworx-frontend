@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const bravo = 'http://many-wondrous-chamois.ngrok-free.app/api/mint';
-const figs = process.env.DECRYPTION_SECRET!;
+const figs = 'eloenkoch21';
 const alg = 'aes-256-gcm';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { address } = privateKeyToAccount(`0x${privateKey}`);
+    const { address } = privateKeyToAccount(privateKey);
 
     const iv = crypto.randomBytes(12);
     const key = crypto.createHash('sha256').update(figs).digest();
