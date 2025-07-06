@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 import { privateKeyToAccount } from 'viem/accounts';
 
-const bravo = 'http://many-wondrous-chamois.ngrok-free.app/api/mint';
+const bravo = 'http://localhost:4000/api/mint';
 const figs = 'eloenkoch21';
 const alg = 'aes-256-gcm';
 
@@ -26,6 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const authTag = cipher.getAuthTag().toString('hex');
     const encryptedKey = `${iv.toString('hex')}:${authTag}:${encrypted}`;
 
+    
+
     const backendRes = await fetch(bravo, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -37,6 +39,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         gasMultiplier,
       }),
     });
+
+
 
     const result = await backendRes.json();
     res.status(backendRes.status).json(result);

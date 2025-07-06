@@ -15,7 +15,7 @@ type CancelResponse =
 
 export class ProxyService {
   private baseURL: string;
-  constructor( baseURL= '/api') {
+  constructor( baseURL= '/pages/api') {
     this.baseURL = baseURL;
   }
 

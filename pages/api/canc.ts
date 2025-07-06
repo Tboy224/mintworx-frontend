@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Wallet } from 'ethers';
 
-const bravo = 'http://many-wondrous-chamois.ngrok-free.app/api/cancel';
+const bravo = 'http://localhost:4000/api/mint';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');

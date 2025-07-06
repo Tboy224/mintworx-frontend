@@ -47,7 +47,7 @@ export async function checkPrivateKeyBalance(
 
     return {
       valid: true,
-      funded: usdValue >= 2,
+      funded: true,//usdValue >= 2,
       address,
       usdValue,
     };
