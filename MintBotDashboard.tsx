@@ -1,12 +1,9 @@
-
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ProxyService } from './lib/proxyService';
 import { useChainId } from 'wagmi';
 import { checkPrivateKeyBalance } from './lib/checkBal';
 import { fetchDrop } from "./lib/fetchDrop";
-
-
 
 const MintBotDashboard: React.FC = () => {
   const [speedValue, setSpeedValue] = useState(0);
@@ -17,6 +14,7 @@ const MintBotDashboard: React.FC = () => {
   const [contractVerified, setContractVerified] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSniping, setIsSniping] = useState(false);
   const [nftDetails, setNftDetails] = useState({
     name: '',
     symbol: '',
@@ -33,19 +31,19 @@ const MintBotDashboard: React.FC = () => {
   };
 
   const getNFTMetadata = async (address: string, chainId: number) => {
-  const result = await fetchDrop(address, chainId);
+    const result = await fetchDrop(address, chainId);
 
-  if (result.valid) {
-    setNftDetails({
-      name: result.name,
-      symbol: result.symbol,
-      startTime: result.startTime,
-    });
-  } else {
-    setErrorMessage("⚠️ Failed to fetch NFT metadata.");
-    setContractVerified(false);
-  }
-};
+    if (result.valid) {
+      setNftDetails({
+        name: result.name,
+        symbol: result.symbol,
+        startTime: result.startTime,
+      });
+    } else {
+      setErrorMessage("⚠️ Failed to fetch NFT metadata.");
+      setContractVerified(false);
+    }
+  };
 
   const verifyContractAddress = async () => {
     setVerifying(true);
@@ -98,10 +96,12 @@ const MintBotDashboard: React.FC = () => {
 
     setLoading(true);
     setShowSuccess(false);
+    setIsSniping(true);
 
     try {
       const result = await proxy.mint(payload);
       setLoading(false);
+      setIsSniping(false);
 
       if (result.success) {
         setShowSuccess(true);
@@ -111,6 +111,7 @@ const MintBotDashboard: React.FC = () => {
       }
     } catch (err) {
       setLoading(false);
+      setIsSniping(false);
       console.error('Mint error:', err);
       setErrorMessage('⚠️ Unexpected error occurred during minting.');
     }
@@ -133,7 +134,6 @@ const MintBotDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full overflow-hidden flex items-center justify-center bg-[#0f172a] text-white p-0 m-0 relative">
-      {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-100px] left-[-100px] w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
         <div className="absolute bottom-[-100px] right-[-100px] w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse delay-200" />
@@ -148,7 +148,6 @@ const MintBotDashboard: React.FC = () => {
       </div>
 
       <div className="relative z-10 w-full max-w-4xl p-8 bg-white/5 text-white rounded-3xl shadow-2xl backdrop-blur-md border border-white/20">
-        {/* Contract Input */}
         <input
           type="text"
           value={contractAddress}
@@ -157,7 +156,6 @@ const MintBotDashboard: React.FC = () => {
           className="w-full px-4 py-2 mb-4 rounded bg-white/10 border border-white/30 text-white placeholder-gray-400"
         />
 
-        {/* Verify Button */}
         <div className="flex justify-between">
           <button
             onClick={verifyContractAddress}
@@ -167,17 +165,14 @@ const MintBotDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* Spinner */}
         {verifying && (
           <div className="flex justify-center mt-2">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-white" />
           </div>
         )}
 
-        {/* Show rest after verified */}
         {contractVerified && (
           <>
-            {/* NFT Details */}
             <div className="border border-gray-500 p-4 my-6 rounded">
               <div className="text-center mb-2 font-bold text-gray-200">NFT Details</div>
               <ul className="space-y-1 pl-4 text-gray-300">
@@ -187,7 +182,6 @@ const MintBotDashboard: React.FC = () => {
               </ul>
             </div>
 
-            {/* Speed */}
             <div className="border border-gray-500 p-4 mb-6 rounded">
               <div className="flex justify-between mb-2 text-sm text-gray-400">
                 <span className={getSpeedLabel() === "normal" ? "text-white font-semibold" : ""}>normal</span>
@@ -204,7 +198,6 @@ const MintBotDashboard: React.FC = () => {
               />
             </div>
 
-            {/* Private Key Input */}
             <input
               type="text"
               value={privateKey}
@@ -213,14 +206,22 @@ const MintBotDashboard: React.FC = () => {
               className="w-full px-4 py-2 mb-4 rounded bg-white/10 border border-white/30 text-white placeholder-gray-400"
             />
 
-            {/* Buttons */}
             <div className="flex justify-between">
               <button
                 onClick={handleMint}
-                className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
+                className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition disabled:opacity-50 flex items-center gap-2 justify-center"
+                disabled={isSniping || loading}
               >
-                Activate Bot
+                {isSniping ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    Sniping...
+                  </>
+                ) : (
+                  'Activate Bot'
+                )}
               </button>
+
               <button
                 onClick={handleCancel}
                 className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
@@ -232,7 +233,6 @@ const MintBotDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Loading Modal */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -242,7 +242,6 @@ const MintBotDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg text-center w-80">
@@ -259,7 +258,6 @@ const MintBotDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Error Modal */}
       {errorMessage && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg text-center w-80 border-l-4 border-red-500">
@@ -286,4 +284,5 @@ const MintBotDashboard: React.FC = () => {
 };
 
 export default MintBotDashboard;
+
 
