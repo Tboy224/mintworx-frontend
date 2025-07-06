@@ -4,14 +4,30 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ProxyService } from './lib/proxyService';
 import { useChainId } from 'wagmi';
 import { checkPrivateKeyBalance } from './lib/checkBal';
+import { ethers } from "ethers";
+
+const abi = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function totalSupply() view returns (uint256)",
+  "function startTime() view returns (uint256)"
+];
 
 const MintBotDashboard: React.FC = () => {
   const [speedValue, setSpeedValue] = useState(0);
   const [privateKey, setPrivateKey] = useState('');
   const [contractAddress, setContractAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [contractVerified, setContractVerified] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [nftDetails, setNftDetails] = useState({
+    name: '',
+    symbol: '',
+    totalSupply: '',
+    startTime: ''
+  });
 
   const proxy = new ProxyService();
   const chainId = useChainId();
@@ -20,6 +36,57 @@ const MintBotDashboard: React.FC = () => {
     if (speedValue < 33) return "normal";
     if (speedValue < 66) return "mid";
     return "high";
+  };
+
+  const getNFTMetadata = async (address: string) => {
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(
+        chainId === 1
+          ? 'https://rpc.ankr.com/eth'
+          : chainId === 137
+          ? 'https://rpc.ankr.com/polygon'
+          : chainId === 42161
+          ? 'https://rpc.ankr.com/arbitrum'
+          : undefined
+      );
+
+      const contract = new ethers.Contract(address, abi, provider);
+      const name = await contract.name();
+      const symbol = await contract.symbol();
+      const totalSupply = (await contract.totalSupply()).toString();
+      let startTime = '';
+      try {
+        startTime = (await contract.startTime()).toString();
+      } catch {
+        startTime = 'N/A';
+      }
+
+      setNftDetails({ name, symbol, totalSupply, startTime });
+    } catch (err) {
+      console.error("Error fetching metadata:", err);
+      setErrorMessage("⚠️ Failed to fetch NFT metadata.");
+      setContractVerified(false);
+    }
+  };
+
+  const verifyContractAddress = async () => {
+    setVerifying(true);
+    setErrorMessage('');
+
+    setTimeout(async () => {
+      const isValid = /^0x[a-fA-F0-9]{40}$/.test(contractAddress.trim());
+      if (!contractAddress.trim()) {
+        setErrorMessage("Please enter a contract address.");
+        setContractVerified(false);
+      } else if (!isValid) {
+        setErrorMessage("❌ Invalid contract address format.");
+        setContractVerified(false);
+      } else {
+        await getNFTMetadata(contractAddress.trim());
+        setContractVerified(true);
+      }
+      setVerifying(false);
+    }, 1000);
   };
 
   const handleMint = async () => {
@@ -32,14 +99,15 @@ const MintBotDashboard: React.FC = () => {
       setErrorMessage('Please enter the contract address.');
       return;
     }
-   const check = await checkPrivateKeyBalance(privateKey, chainId);
+
+    const check = await checkPrivateKeyBalance(privateKey, chainId);
     if (!check.valid) {
       setErrorMessage('❌ Invalid private key or unsupported chain.');
       return;
     }
 
     if (!check.funded) {
-      setErrorMessage(` Insufficient funds (~$${check.usdValue?.toFixed(2)}). Minimum $2 required.`);
+      setErrorMessage(`Insufficient funds (~$${check.usdValue?.toFixed(2)}). Minimum $2 required.`);
       return;
     }
 
@@ -87,7 +155,7 @@ const MintBotDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full overflow-hidden flex items-center justify-center bg-[#0f172a] text-white p-0 m-0 relative">
-      {/* Glowing Orbs */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-100px] left-[-100px] w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
         <div className="absolute bottom-[-100px] right-[-100px] w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse delay-200" />
@@ -102,8 +170,7 @@ const MintBotDashboard: React.FC = () => {
       </div>
 
       <div className="relative z-10 w-full max-w-4xl p-8 bg-white/5 text-white rounded-3xl shadow-2xl backdrop-blur-md border border-white/20">
-
-        {/* Contract Address Input */}
+        {/* Contract Input */}
         <input
           type="text"
           value={contractAddress}
@@ -112,56 +179,80 @@ const MintBotDashboard: React.FC = () => {
           className="w-full px-4 py-2 mb-4 rounded bg-white/10 border border-white/30 text-white placeholder-gray-400"
         />
 
-        {/* NFT Details Box */}
-        <div className="border border-gray-500 p-4 mb-6 rounded">
-          <div className="text-center mb-2 font-bold text-gray-200">NFT Details</div>
-          <ul className="space-y-1 pl-4 text-gray-300">
-            <li>name</li>
-            <li>symbol</li>
-            <li>total supply for mint</li>
-            <li>start time</li>
-          </ul>
-        </div>
-
-        {/* Speed Slider */}
-        <div className="border border-gray-500 p-4 mb-6 rounded">
-          <div className="flex justify-between mb-2 text-sm text-gray-400">
-            <span className={getSpeedLabel() === "normal" ? "text-white font-semibold" : ""}>normal</span>
-            <span className={getSpeedLabel() === "mid" ? "text-white font-semibold" : ""}>mid</span>
-            <span className={getSpeedLabel() === "high" ? "text-white font-semibold" : ""}>high</span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={speedValue}
-            onChange={(e) => setSpeedValue(Number(e.target.value))}
-            className="w-full accent-white"
-          />
-        </div>
-
-        {/* Private Key Input */}
-        <input
-          type="text"
-          value={privateKey}
-          onChange={(e) => setPrivateKey(e.target.value)}
-          placeholder="Enter private key"
-          className="w-full px-4 py-2 mb-4 rounded bg-white/10 border border-white/30 text-white placeholder-gray-400"
-        />
-
-        {/* Buttons */}
+        {/* Verify Button */}
         <div className="flex justify-between">
           <button
-            onClick={handleMint}
-            className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
-            Activate Bot
-          </button>
-          <button
-            onClick={handleCancel}
-            className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition">
-            Deactivate Bot
+            onClick={verifyContractAddress}
+            className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
+          >
+            Verify Contract
           </button>
         </div>
+
+        {/* Spinner */}
+        {verifying && (
+          <div className="flex justify-center mt-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-white" />
+          </div>
+        )}
+
+        {/* Show rest after verified */}
+        {contractVerified && (
+          <>
+            {/* NFT Details */}
+            <div className="border border-gray-500 p-4 my-6 rounded">
+              <div className="text-center mb-2 font-bold text-gray-200">NFT Details</div>
+              <ul className="space-y-1 pl-4 text-gray-300">
+                <li><strong>Name:</strong> {nftDetails.name}</li>
+                <li><strong>Symbol:</strong> {nftDetails.symbol}</li>
+                <li><strong>Total Supply:</strong> {nftDetails.totalSupply}</li>
+                <li><strong>Start Time:</strong> {nftDetails.startTime}</li>
+              </ul>
+            </div>
+
+            {/* Speed */}
+            <div className="border border-gray-500 p-4 mb-6 rounded">
+              <div className="flex justify-between mb-2 text-sm text-gray-400">
+                <span className={getSpeedLabel() === "normal" ? "text-white font-semibold" : ""}>normal</span>
+                <span className={getSpeedLabel() === "mid" ? "text-white font-semibold" : ""}>mid</span>
+                <span className={getSpeedLabel() === "high" ? "text-white font-semibold" : ""}>high</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={speedValue}
+                onChange={(e) => setSpeedValue(Number(e.target.value))}
+                className="w-full accent-white"
+              />
+            </div>
+
+            {/* Private Key Input */}
+            <input
+              type="text"
+              value={privateKey}
+              onChange={(e) => setPrivateKey(e.target.value)}
+              placeholder="Enter private key"
+              className="w-full px-4 py-2 mb-4 rounded bg-white/10 border border-white/30 text-white placeholder-gray-400"
+            />
+
+            {/* Buttons */}
+            <div className="flex justify-between">
+              <button
+                onClick={handleMint}
+                className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
+              >
+                Activate Bot
+              </button>
+              <button
+                onClick={handleCancel}
+                className="border border-gray-400 text-white px-4 py-2 rounded hover:bg-white hover:text-black transition"
+              >
+                Deactivate Bot
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Loading Modal */}
@@ -206,7 +297,8 @@ const MintBotDashboard: React.FC = () => {
             <p className="text-sm text-gray-600 whitespace-pre-line">{errorMessage}</p>
             <button
               className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-              onClick={() => setErrorMessage('')}>
+              onClick={() => setErrorMessage('')}
+            >
               Close
             </button>
           </div>
