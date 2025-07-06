@@ -39,7 +39,7 @@ export default function App() {
 
 function AutoRoute() {
   const {isConnected} = useAccount();
-  return isConnected ? <ContractScanPage /> : <ConnectSite />
+  return isConnected ? <MintBotDashboard /> : <ConnectSite />
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {

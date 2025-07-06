@@ -1,7 +1,9 @@
+
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ProxyService } from './lib/proxyService';
 import { useChainId } from 'wagmi';
+import { checkPrivateKeyBalance } from './lib/checkBal';
 
 const MintBotDashboard: React.FC = () => {
   const [speedValue, setSpeedValue] = useState(0);
@@ -28,6 +30,16 @@ const MintBotDashboard: React.FC = () => {
 
     if (!contractAddress.trim()) {
       setErrorMessage('Please enter the contract address.');
+      return;
+    }
+   const check = await checkPrivateKeyBalance(privateKey, chainId);
+    if (!check.valid) {
+      setErrorMessage('❌ Invalid private key or unsupported chain.');
+      return;
+    }
+
+    if (!check.funded) {
+      setErrorMessage(` Insufficient funds (~$${check.usdValue?.toFixed(2)}). Minimum $2 required.`);
       return;
     }
 
@@ -205,3 +217,4 @@ const MintBotDashboard: React.FC = () => {
 };
 
 export default MintBotDashboard;
+
