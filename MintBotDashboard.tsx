@@ -183,7 +183,6 @@ const MintBotDashboard: React.FC = () => {
               <ul className="space-y-1 pl-4 text-gray-300">
                 <li><strong>Name:</strong> {nftDetails.name}</li>
                 <li><strong>Symbol:</strong> {nftDetails.symbol}</li>
-                <li><strong>Total Supply:</strong> {nftDetails.totalSupply}</li>
                 <li><strong>Start Time:</strong> {nftDetails.startTime}</li>
               </ul>
             </div>

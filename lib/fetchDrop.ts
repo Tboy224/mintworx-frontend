@@ -58,8 +58,8 @@ export async function fetchDrop(
       valid: true,
       name: name,
       symbol: symbol,
-      startTime: new Date(Number(startTime) * 1000).toISOString(),
-      endTime: new Date(Number(endTime) * 1000).toISOString(),
+      startTime: new Date(Number(startTime) * 1000).toUTCString(),
+      endTime: new Date(Number(endTime) * 1000).toUTCString(),
     };
   } catch {
     return { valid: false };
