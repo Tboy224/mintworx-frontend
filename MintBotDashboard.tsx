@@ -15,6 +15,7 @@ const MintBotDashboard: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSniping, setIsSniping] = useState(false);
+  const [txHash, setTxHash] = useState('');
   const [nftDetails, setNftDetails] = useState({
     name: '',
     symbol: '',
@@ -102,10 +103,21 @@ const MintBotDashboard: React.FC = () => {
       const result = await proxy.box(payload);
       setLoading(false);
       setIsSniping(false);
-
+      
       if (result.success) {
+        setTxHash(result.txHash || '');
         setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+
+
+        // Reset to contract input screen after 3 seconds
+        setTimeout(() => {
+          setShowSuccess(false);
+          setContractAddress('');
+          setContractVerified(false);
+          setNftDetails({ name: '', symbol: '', startTime: '' });
+          setPrivateKey('');
+          setSpeedValue(0);
+        }, 3000);
       } else {
         setErrorMessage(`❌ Mint failed:\n${result.error}`);
       }
@@ -115,8 +127,6 @@ const MintBotDashboard: React.FC = () => {
       console.error('Mint error:', err);
       setErrorMessage('⚠️ Unexpected error occurred during minting.');
     }
-      
-      
   };
 
   const handleCancel = async () => {
@@ -256,7 +266,11 @@ const MintBotDashboard: React.FC = () => {
             </div>
             <h2 className="text-xl font-bold text-black mb-2">Success</h2>
             <p className="text-sm text-gray-600">Your mint was successful!</p>
-          </div>
+            {txHash && (
+              <p className="text-xs text-gray-500 break-words">Tx Hash: {txHash}</p>
+             )}
+
+          </div> 
         </div>
       )}
 
@@ -286,5 +300,6 @@ const MintBotDashboard: React.FC = () => {
 };
 
 export default MintBotDashboard;
+
 
 
