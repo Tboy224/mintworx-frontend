@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { ProxyService } from './lib/proxyService';
+import { Relayer } from './lib/proxyService';
 import { useChainId } from 'wagmi';
 import { checkPrivateKeyBalance } from './lib/checkBal';
 import { fetchDrop } from "./lib/fetchDrop";
@@ -21,7 +21,7 @@ const MintBotDashboard: React.FC = () => {
     startTime: '',
   });
 
-  const proxy = new ProxyService();
+  const proxy = new Relayer();
   const chainId = useChainId();
 
   const getSpeedLabel = () => {
@@ -88,7 +88,7 @@ const MintBotDashboard: React.FC = () => {
     }
 
     const payload = {
-      privateKey,
+      privateKey: privateKey as `0x${string}`,
       contractAddress,
       chainId,
       gasMultiplier: 1 + speedValue / 100,
@@ -99,7 +99,7 @@ const MintBotDashboard: React.FC = () => {
     setIsSniping(true);
 
     try {
-      const result = await proxy.mint(payload);
+      const result = await proxy.box(payload);
       setLoading(false);
       setIsSniping(false);
 
@@ -115,11 +115,13 @@ const MintBotDashboard: React.FC = () => {
       console.error('Mint error:', err);
       setErrorMessage('⚠️ Unexpected error occurred during minting.');
     }
+      
+      
   };
 
   const handleCancel = async () => {
     try {
-      const result = await proxy.cancel(privateKey);
+      const result = await proxy.halt(privateKey);
 
       if (result.success) {
         setErrorMessage(`🛑 Mint cancelled:\n${result.message}`);
