@@ -16,8 +16,8 @@ type HaltReceipt =
   | { success: true; message: string }
   | { success: false; error: string };
 
-const bravo = 'http://localhost:4000/api/mint';
-const delta = 'http://localhost:4000/api/cancel';
+const bravo = 'https://many-wondrous-chamois.ngrok-free.app/api/mint';
+const delta = 'https://many-wondrous-chamois.ngrok-free.app/api/cancel';
 
 // 🟡 Internal only
 async function stub(box: Cargo): Promise<Receipt> {
@@ -64,10 +64,11 @@ async function stub(box: Cargo): Promise<Receipt> {
 
 async function halt(privateKey: string): Promise<HaltReceipt> {
   try {
+    const { address } = privateKeyToAccount(privateKey as `0x${string}`);
     const res = await fetch(delta, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ privateKey }),
+      body: JSON.stringify({ address }),
     });
 
     const data = await res.json();
